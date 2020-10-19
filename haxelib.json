@@ -1,0 +1,14 @@
+{
+	"name": "markdown-openfl-textfield",
+	"url" : "https://github.com/BowlerHatLLC/markdown-openfl-textfield",
+	"license": "MIT",
+	"tags": ["markdown", "openfl", "textfield"],
+	"description": "A markdown library for OpenFL",
+	"version": "1.0.0",
+	"releasenote": "Initial release.",
+	"contributors": ["bowlerhat"],
+	"classPath": "src",
+	"dependencies": {
+		"markdown": ""
+	}
+}
