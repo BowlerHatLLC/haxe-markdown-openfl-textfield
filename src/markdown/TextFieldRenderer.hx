@@ -6,7 +6,8 @@ import markdown.AST.ElementNode;
 import markdown.AST.NodeVisitor;
 
 class TextFieldRenderer implements NodeVisitor {
-	static var BLOCK_TAGS = new EReg('blockquote|h1|h2|h3|h4|h5|h6|hr|p|pre', '');
+	static var BLOCK_TAGS = new EReg('blockquote|h1|h2|h3|h4|h5|h6|hr|p|pre|li|ul|ol', '');
+	static var SKIPPED_TAGS = new EReg('ul|ol', '');
 
 	var buffer:StringBuf;
 
@@ -14,8 +15,13 @@ class TextFieldRenderer implements NodeVisitor {
 
 	public function render(nodes:Array<Node>):String {
 		buffer = new StringBuf();
-		for (node in nodes)
+		for (node in nodes) {
+			if (Std.isOfType(node, ElementNode)) {
+				var elementNode = cast(node, ElementNode);
+				node = new WrappedElementNode(elementNode.tag, elementNode.children, null);
+			}
 			node.accept(this);
+		}
 		return buffer.toString();
 	}
 
@@ -23,37 +29,57 @@ class TextFieldRenderer implements NodeVisitor {
 		buffer.add(text.text);
 	}
 
+	private function needsNewLine(wrappedElement:WrappedElementNode):Bool {
+		if (!BLOCK_TAGS.match(wrappedElement.tag)) {
+			return false;
+		}
+		if (wrappedElement.parent == null) {
+			return buffer.toString() != "";
+		}
+		var index = wrappedElement.parent.children.indexOf(wrappedElement);
+		if (index == 0 && SKIPPED_TAGS.match(wrappedElement.parent.tag)) {
+			return needsNewLine(wrappedElement.parent);
+		}
+		return index != 0;
+	}
+
 	public function visitElementBefore(element:ElementNode):Bool {
+		if (SKIPPED_TAGS.match(element.tag)) {
+			return true;
+		}
+
+		var wrappedElement = cast(element, WrappedElementNode);
+
 		// Hackish. Separate block-level elements with newlines.
-		if (buffer.toString() != "" && BLOCK_TAGS.match(element.tag)) {
+		if (this.needsNewLine(wrappedElement)) {
 			buffer.add('\n');
 		}
 
 		switch (element.tag) {
 			case "h1":
-				buffer.add('<p');
+				buffer.add('<p class="h1"');
 			case "h2":
-				buffer.add('<p');
+				buffer.add('<p class="h2"');
 			case "h3":
-				buffer.add('<p');
+				buffer.add('<p class="h3"');
 			case "h4":
-				buffer.add('<p');
+				buffer.add('<p class="h4"');
 			case "h5":
-				buffer.add('<p');
+				buffer.add('<p class="h5"');
 			case "h6":
-				buffer.add('<p');
+				buffer.add('<p class="h6"');
 			case "pre":
-				buffer.add('<p');
+				buffer.add('<p class="pre"');
 			case "code":
-				buffer.add('<font face="_typewriter"');
+				buffer.add('<span class="code"');
 			case "strong":
 				buffer.add('<b');
 			case "em":
 				buffer.add('<i');
 			case "blockquote":
-				buffer.add('<textformat blockindent="20"');
+				buffer.add('<textformat class="blockquote" blockindent="20"');
 			case "hr":
-				buffer.add('<p>---</p>');
+				buffer.add('<p class="hr">---</p>');
 				return true;
 			default:
 				buffer.add('<${element.tag}');
@@ -77,40 +103,62 @@ class TextFieldRenderer implements NodeVisitor {
 
 			switch (element.tag) {
 				case "h1":
-					buffer.add('<font size=\"+2\">');
+					buffer.add('<font size="+5">');
 				case "h2":
-					buffer.add('<font size=\"+2\">');
+					buffer.add('<font size="+4">');
+				case "h3":
+					buffer.add('<font size="+3">');
+				case "h4":
+					buffer.add('<font size="+2">');
+				case "h5":
+					buffer.add('<font size="+1">');
 				case "pre":
-					buffer.add('<font face=\"_typewriter\">');
+					buffer.add('<font face="_typewriter">');
+				case "code":
+					buffer.add('<font face="_typewriter">');
+				case "a":
+					buffer.add('<u>');
 			}
+
+			#if !flash
+			// workaround for non-Flash targets that do not render the list item bullet
+			if (BLOCK_TAGS.match(element.tag) && wrappedElement.parent != null && wrappedElement.parent.tag == "li") {
+				buffer.add('• ');
+			}
+			#end
 			return true;
 		}
 	}
 
 	public function visitElementAfter(element:ElementNode):Void {
+		if (SKIPPED_TAGS.match(element.tag)) {
+			return;
+		}
 		switch (element.tag) {
 			case "h1":
 				buffer.add('</font></p>');
 			case "h2":
 				buffer.add('</font></p>');
 			case "h3":
-				buffer.add('</p>');
+				buffer.add('</font></p>');
 			case "h4":
-				buffer.add('</p>');
+				buffer.add('</font></p>');
 			case "h5":
-				buffer.add('</p>');
+				buffer.add('</font></p>');
 			case "h6":
 				buffer.add('</p>');
 			case "pre":
 				buffer.add('</font></p>');
 			case "code":
-				buffer.add('</font>');
+				buffer.add('</font></span>');
 			case "strong":
 				buffer.add('</b>');
 			case "em":
 				buffer.add('</i>');
 			case "blockquote":
 				buffer.add("</textformat>");
+			case "a":
+				buffer.add("</u></a>");
 			case "hr":
 				return;
 			default:
@@ -127,4 +175,22 @@ class TextFieldRenderer implements NodeVisitor {
 			return ia - ib;
 		return Reflect.compare(a, b);
 	}
+}
+
+class WrappedElementNode extends ElementNode {
+	public function new(tag:String, children:Array<Node>, parent:WrappedElementNode) {
+		for (i in 0...children.length) {
+			var child = children[i];
+			if (!Std.isOfType(child, ElementNode)) {
+				continue;
+			}
+			var elementNodeChild = cast(child, ElementNode);
+			var wrappedChild = new WrappedElementNode(elementNodeChild.tag, elementNodeChild.children, this);
+			children[i] = wrappedChild;
+		}
+		super(tag, children);
+		this.parent = parent;
+	}
+
+	public var parent:WrappedElementNode;
 }
