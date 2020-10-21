@@ -18,7 +18,7 @@ class TextFieldRenderer implements NodeVisitor {
 		for (node in nodes) {
 			if (Std.isOfType(node, ElementNode)) {
 				var elementNode = cast(node, ElementNode);
-				node = new WrappedElementNode(elementNode.tag, elementNode.children, null);
+				node = new WrappedElementNode(elementNode.tag, elementNode.children, elementNode.attributes, null);
 			}
 			node.accept(this);
 		}
@@ -178,18 +178,21 @@ class TextFieldRenderer implements NodeVisitor {
 }
 
 class WrappedElementNode extends ElementNode {
-	public function new(tag:String, children:Array<Node>, parent:WrappedElementNode) {
+	public function new(tag:String, children:Array<Node>, attributes:Map<String, String>, parent:WrappedElementNode) {
 		for (i in 0...children.length) {
 			var child = children[i];
 			if (!Std.isOfType(child, ElementNode)) {
 				continue;
 			}
 			var elementNodeChild = cast(child, ElementNode);
-			var wrappedChild = new WrappedElementNode(elementNodeChild.tag, elementNodeChild.children, this);
+			var wrappedChild = new WrappedElementNode(elementNodeChild.tag, elementNodeChild.children, elementNodeChild.attributes, this);
 			children[i] = wrappedChild;
 		}
 		super(tag, children);
 		this.parent = parent;
+		for (key in attributes.keys()) {
+			this.attributes.set(key, attributes.get(key));
+		}
 	}
 
 	public var parent:WrappedElementNode;
