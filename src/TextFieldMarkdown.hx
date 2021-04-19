@@ -23,7 +23,7 @@ class TextFieldMarkdown {
 			var blocks = document.parseLines(lines);
 			return renderHtml(blocks);
 		} catch (e:Dynamic) {
-			return '<p><font face="_typewriter>$e</font></p>';
+			return '<p><font face="_typewriter">$e</font></p>';
 		}
 	}
 
