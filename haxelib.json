@@ -4,8 +4,8 @@
 	"license": "MIT",
 	"tags": ["markdown", "openfl", "textfield"],
 	"description": "A markdown library for OpenFL",
-	"version": "1.0.1",
-	"releasenote": "Fix missing quote in error message HTML.",
+	"version": "1.0.2",
+	"releasenote": "Fix exception for nodes without children.",
 	"contributors": ["bowlerhat"],
 	"classPath": "src",
 	"dependencies": {
