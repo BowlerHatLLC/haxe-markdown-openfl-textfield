@@ -179,6 +179,11 @@ class TextFieldRenderer implements NodeVisitor {
 
 class WrappedElementNode extends ElementNode {
 	public function new(tag:String, children:Array<Node>, attributes:Map<String, String>, parent:WrappedElementNode) {
+		if (children == null) {
+			// accept() does not check for null children
+			// so we need an empty array
+			children = [];
+		}
 		for (i in 0...children.length) {
 			var child = children[i];
 			if (!Std.isOfType(child, ElementNode)) {
