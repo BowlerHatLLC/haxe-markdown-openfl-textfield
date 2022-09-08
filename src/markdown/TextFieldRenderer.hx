@@ -120,7 +120,7 @@ class TextFieldRenderer implements NodeVisitor {
 					buffer.add('<u>');
 			}
 
-			#if (!flash || openfl < "9.2.0")
+			#if (!flash && openfl < "9.2.0")
 			// workaround for older, non-flash targets that do not render the list item bullet
 			if (BLOCK_TAGS.match(element.tag) && wrappedElement.parent != null && wrappedElement.parent.tag == "li") {
 				buffer.add('• ');
