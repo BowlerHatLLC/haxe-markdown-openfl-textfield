@@ -9,19 +9,17 @@ on:
       - master
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/upload-artifact@v2
-      with:
-        name: markdown-openfl-textfield-haxelib
-        path: |
-          src/
-          haxelib.json
-          README.md
-          LICENSE
-        if-no-files-found: error
+      - uses: actions/checkout@v3
+      - uses: actions/upload-artifact@v3
+        with:
+          name: markdown-openfl-textfield-haxelib
+          path: |
+            src/
+            haxelib.json
+            README.md
+            LICENSE
+          if-no-files-found: error
