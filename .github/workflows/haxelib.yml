@@ -20,4 +20,5 @@ jobs:
             haxelib.json
             README.md
             LICENSE
+            CHANGELOG.md
           if-no-files-found: error
