@@ -3,7 +3,7 @@
   "url": "https://github.com/BowlerHatLLC/haxe-markdown-openfl-textfield",
   "license": "MIT",
   "tags": ["markdown", "openfl", "textfield"],
-  "description": "A markdown library for OpenFL",
+  "description": "Display markdown using the htmlText property of OpenFL's TextField class",
   "version": "1.0.2",
   "releasenote": "Fix exception for nodes without children.",
   "contributors": ["bowlerhat"],
