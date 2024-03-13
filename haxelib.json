@@ -5,7 +5,7 @@
   "tags": ["markdown", "openfl", "textfield"],
   "description": "Display markdown using the htmlText property of OpenFL's TextField class",
   "version": "1.0.3",
-  "releasenote": "Fix exception for nodes without children.",
+  "releasenote": "Fix extra bullet in list items for some OpenFL versions",
   "contributors": ["bowlerhat"],
   "classPath": "src",
   "dependencies": {
